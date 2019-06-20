@@ -1,5 +1,3 @@
-# This script will detect faces via your webcam.
-# Tested with OpenCV3
 
 import cv2
 import face_recognition
@@ -50,9 +48,7 @@ while(cap.isOpened()):
                             cv2.imshow('frame', frame)
                             unknown_count+=1
                             print(unknown_count)
-                           
-                            
-                
+
             else:
                 continue
         else:
