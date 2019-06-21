@@ -4,12 +4,13 @@ import face_recognition
 from PIL import Image,ImageDraw
 import numpy as np
 from time import sleep
-
+import time
 
 cap = cv2.VideoCapture('nfs.mp4')
 unknown_count=0
 
 while(cap.isOpened()):
+    start=time.time()
     try:
         # Capture frame-by-frame
         ret, frame = cap.read()
@@ -33,6 +34,7 @@ while(cap.isOpened()):
                             cv2.imshow('frame', frame)
                             unknown_count+=1
                             print(unknown_count)
+                            print(time.time()-start)
             else:
                 continue
         else:
