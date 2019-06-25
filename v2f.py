@@ -26,7 +26,7 @@ class FaceCount:
 
 
     def countUnknown(self):
-        cap = cv2.VideoCapture('nfs.mp4')
+        cap = cv2.VideoCapture('video3.mp4')
         facelist=[]
         while(cap.isOpened()):
             try:
@@ -52,7 +52,8 @@ class FaceCount:
                     for new_face_encodings in face_encodings:
                         for old_face_encodings in facelist:
                             dup=False
-                            match=face_recognition.compare_faces(old_face_encodings, new_face_encodings)
+                            match=face_recognition.face_distance(old_face_encodings,new_face_encodings)
+                            
                             for match in match:
                                 if match:
                                     dup=True
@@ -61,11 +62,11 @@ class FaceCount:
                             self.unknown_count+=1
                             facelist.append(face_encodings)
                             print("unknown people--------->",self.unknown_count)
-                                
                             #facelist.clear() 
                     
                 else:
                     if face_locations:
+                        print(face_locations)
                         self.unknown_count+=len(face_locations)
                         print("unknown people--------->",self.unknown_count)
                         facelist.append(face_encodings)
