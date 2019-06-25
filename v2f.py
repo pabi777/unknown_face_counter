@@ -18,57 +18,89 @@ def face_distance_to_conf(face_distance, face_match_threshold=0.6):
         return linear_val + ((1.0 - linear_val) * math.pow((linear_val - 0.5) * 2, 0.2))
 
 def countUnknown():
+    
     cap = cv2.VideoCapture('nfs.mp4')
     unknown_count=0
     d=0
     facelist=[]
-    face_encodings=None
     while(cap.isOpened()):
-        start=time.time()
+        
         try:
-            if len(facelist)>=10:
-                facelist.clear()
-            # Capture frame-by-frame
+            istart=time.time()
             ret, frame = cap.read()
+            print('frame reading time------->',time.time()-istart)
+            
+            start=time.time()
             rgb_frame = frame[:, :, ::-1]
             face_locations = face_recognition.face_locations(rgb_frame)
             face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
-
+            print("detection time----------->",time.time()-start)
+            
+            start=time.time()
+            cv2.imshow('frame', frame)
             for (top, right, bottom, left) in face_locations:
                 cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
                 cv2.imshow('frame', frame)
+            print("showing the detected frame time----------->",time.time()-start)
             
-            if face_encodings:
-                facelist.append(face_encodings[0])
-                if d==0:
-                    print(face_encodings)
-                    unknown_count=len(face_locations)
-                    d+=1
-                    print(unknown_count)
+            start=time.time()
+            if facelist:     
+                for new_face_encodings in face_encodings:
+                    for old_face_encodings in facelist:
+                        dup=False
+                        match=face_recognition.compare_faces(old_face_encodings, new_face_encodings)
+                        for match in match:
+                            if match:
+                              dup=True
+                              break
+                        if dup==False:
+                            unknown_count+=1
+                            print("unknown people--------->",unknown_count)
+                print("face comparision time----------->",time.time()-start)    
+                facelist.clear() 
+                facelist.append(face_encodings)
+            else:
+                #print("facelist is empty")
+                unknown_count+=len(face_locations)
+                print("unknown people--------->",unknown_count)
+                facelist.append(face_encodings)
+            print("whole thing time----->",time.time()-istart)
             
-            key = cv2.waitKey(1000)
-            ret1,frame1= cap.read()
-            rgb_frame1 = frame1[:, :, ::-1]
-            face_locations1 = face_recognition.face_locations(rgb_frame1)
-            face_encodings1 = face_recognition.face_encodings(rgb_frame1, face_locations1)
+            
+            
+            #key = cv2.waitKey(1000)
+            # ret1,frame1= cap.read()
+            # rgb_frame1 = frame1[:, :, ::-1]
+            # face_locations1 = face_recognition.face_locations(rgb_frame1)
+            # face_encodings1 = face_recognition.face_encodings(rgb_frame1, face_locations1)
 
             
-            old_max_people=(len(face_locations))
-            new_max_people=(len(face_locations1))
-            print(new_max_people,old_max_people)
-            if new_max_people>old_max_people:
-                for f in facelist:
-                    faceDistance=face_recognition.face_distance(face_encodings1,f)#face_recognition.compare_faces(face_encodings1,f)
-                    #print(face_distance_to_conf(faceDistance))
-                    for faced in faceDistance:
-                        match=abs(face_distance_to_conf(faced))
-                        print(match)
-                        #for match in match:
-                        if match<0.40:
-                            new_people=abs(new_max_people-old_max_people)
-                            unknown_count+=new_people
-                            print(unknown_count)
-                        
+            # old_max_people=(len(face_locations))
+            # new_max_people=(len(face_locations1))
+            # #print(new_max_people,old_max_people)
+            # if face_encodings and face_encodings1:
+            #     facelist.append(face_encodings[0])
+            #     facelist.append(face_encodings1[0])
+            #     if d==0:
+            #         print(face_encodings)
+            #         unknown_count=len(face_locations)+len(face_locations1)
+            #         d+=1
+            #         print(unknown_count)
+
+
+            # #if new_max_people>old_max_people:
+            # for f in facelist:
+            #     faceDistance=face_recognition.face_distance(face_encodings1,f)#face_recognition.compare_faces(face_encodings1,f)
+            #     #print(face_distance_to_conf(faceDistance))
+            #     for faced in faceDistance:
+            #         match=abs(face_distance_to_conf(faced))
+            #         #print(match)
+            #         #for match in match:
+            #         if match<0.46:
+            #             new_people=abs(new_max_people-old_max_people)
+            #             unknown_count+=new_people
+            #             print(unknown_count)
+                    
                 #if face_encodings1 is not None:
                     
                     # for face_encodings in facelist:
@@ -100,7 +132,6 @@ def countUnknown():
                 break
 
         except Exception as e:
-            raise
             print(e)
 # When everything done, release the capture
     cap.release()
