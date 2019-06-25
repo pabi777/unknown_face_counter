@@ -21,18 +21,8 @@ class FaceCount:
             linear_val = 1.0 - (face_distance / (range * 2.0))
             return linear_val + ((1.0 - linear_val) * math.pow((linear_val - 0.5) * 2, 0.2))
 
-    def face_compare(self,face_encodings,facelist):
-        for new_face_encodings in face_encodings:
-            for old_face_encodings in facelist:
-                dup=False
-                match=face_recognition.compare_faces(old_face_encodings, new_face_encodings)
-                for match in match:
-                    if match:
-                        dup=True
-                        break
-                if dup==False:
-                    self.unknown_count+=1
-                    print("unknown people--------->",self.unknown_count)
+    
+        
 
 
     def countUnknown(self):
@@ -59,16 +49,26 @@ class FaceCount:
                 
                 start=time.time()
                 if facelist:     
-                    t2=threading.Thread(target=self.face_compare,args=(face_encodings,facelist))
-                    t2.start()
-                    print("face comparision time----------->",time.time()-start)    
-                    facelist.clear() 
-                    facelist.append(face_encodings)
+                    for new_face_encodings in face_encodings:
+                        for old_face_encodings in facelist:
+                            dup=False
+                            match=face_recognition.compare_faces(old_face_encodings, new_face_encodings)
+                            for match in match:
+                                if match:
+                                    dup=True
+                                    break
+                        if not dup:
+                            self.unknown_count+=1
+                            facelist.append(face_encodings)
+                            print("unknown people--------->",self.unknown_count)
+                                
+                            #facelist.clear() 
+                    
                 else:
-                    #print("facelist is empty")
-                    self.unknown_count+=len(face_locations)
-                    print("unknown people--------->",self.unknown_count)
-                    facelist.append(face_encodings)
+                    if face_locations:
+                        self.unknown_count+=len(face_locations)
+                        print("unknown people--------->",self.unknown_count)
+                        facelist.append(face_encodings)
                 #print("whole thing time----->",time.time()-istart)
                 
                 if cv2.waitKey(1) & 0xFF == ord('q'):

@@ -21,7 +21,7 @@ def FrameCapture(path):
 		success, image = vidObj.read() 
 
 		# Saves the frames with frame-count 
-		cv2.imwrite("janala/frame%d.jpg" % count, image) 
+		cv2.imwrite("lp/frame%d.jpg" % count, image) 
 
 		count += 1
 
@@ -29,4 +29,4 @@ def FrameCapture(path):
 if __name__ == '__main__': 
 
 	# Calling the function 
-	FrameCapture("janala.mp4") 
+	FrameCapture("lp.mp4") 
